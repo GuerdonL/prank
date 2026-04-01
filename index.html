@@ -807,13 +807,13 @@
 
   function checkReveal() {
     var now = new Date();
-    var ukParts = new Intl.DateTimeFormat('en-GB', {
+    var laParts = new Intl.DateTimeFormat('en-US', {
       day: 'numeric', month: 'numeric', year: 'numeric',
       hour: 'numeric', minute: 'numeric',
-      hour12: false, timeZone: 'Europe/London'
+      hour12: false, timeZone: 'America/Los_Angeles'
     }).formatToParts(now);
     var p = {};
-    ukParts.forEach(function(x) { p[x.type] = parseInt(x.value) || 0; });
+    laParts.forEach(function(x) { p[x.type] = parseInt(x.value) || 0; });
     if ((p.month === 4 && p.day >= 2) || p.month > 4 || (p.month < 4 && p.year > 2026)) {
       document.getElementById('prank-overlay').classList.add('active');
       document.getElementById('main-site').style.display = 'none';
