@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>STRATEGIC ALERT BULLETIN</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy-deep: #080e1a;
+    --navy: #0c1829;
+    --navy-mid: #142236;
+    --navy-light: #1c3048;
+    --slate: #2e4460;
+    --steel: #5a7490;
+    --ash: #8899aa;
+    --cloud: #bcc8d4;
+    --bone: #dde4eb;
+    --white: #eef2f6;
+    --warn-bg: rgba(232, 180, 52, 0.06);
+    --warn-bg-strong: rgba(232, 180, 52, 0.10);
+    --warn-border: rgba(232, 180, 52, 0.18);
+    --warn-text: #e8b434;
+    --alert-red: #c0392b;
+    --alert-red-dim: rgba(192, 57, 43, 0.12);
+    --alert-red-text: #e74c3c;
+    --alert-amber: #d4a017;
+    --alert-green: #27ae60;
+    --flash-red: #ff4757;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--navy-deep);
+    color: var(--bone);
+    font-family: 'DM Mono', 'Courier New', monospace;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    font-size: 12px;
+  }
+
+  /* ══════════════════════════════════════
+     PRANK REVEAL
+     ══════════════════════════════════════ */
+  #prank-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--navy-deep);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+    animation: overlay-in 0.6s ease-out;
+  }
+
+  @keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+  #prank-overlay.active { display: flex; }
+
+  .prank-emoji {
+    font-size: 72px;
+    margin-bottom: 20px;
+    animation: bounce 0.6s ease-in-out infinite alternate;
+  }
+
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-14px); } }
+
+  .prank-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 8vw, 68px);
+    background: linear-gradient(135deg, #ff4757, #e8a838, #ff6b81);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 14px;
+    line-height: 1.1;
+  }
+
+  .prank-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(13px, 2.5vw, 17px);
+    color: var(--cloud);
+    max-width: 480px;
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+
+  .prank-footer {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--steel);
+    letter-spacing: 1px;
+  }
+
+  /* ══════════════════════════════════════
+     HEADER — tight, condensed, governmental
+     ══════════════════════════════════════ */
+  header {
+    background: var(--navy);
+    border-bottom: 2px solid var(--warn-text);
+  }
+
+  .header-inner {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-classification {
+    background: var(--alert-red);
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .header-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 10px;
+    color: var(--ash);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  #clock {
+    color: var(--warn-text);
+    font-weight: 500;
+  }
+
+  /* ── ALERT STRIPE ── */
+  .alert-stripe {
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--alert-red),
+      var(--alert-red) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+    height: 3px;
+    opacity: 0.7;
+  }
+
+  /* ── TICKER ── */
+  .ticker-bar {
+    background: var(--navy);
+    overflow: hidden;
+    white-space: nowrap;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--navy-mid);
+  }
+
+  .ticker-label {
+    background: var(--alert-red);
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 0 12px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    z-index: 2;
+    position: relative;
+    flex-shrink: 0;
+    animation: pulse-label 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse-label {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .ticker-track {
+    display: flex;
+    animation: scroll-ticker 55s linear infinite;
+  }
+
+  .ticker-track span {
+    font-size: 10px;
+    color: var(--cloud);
+    padding: 0 32px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .ticker-track span::after {
+    content: '//';
+    margin-left: 32px;
+    color: var(--slate);
+  }
+
+  @keyframes scroll-ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── STATUS ROW ── */
+  .status-row {
+    background: var(--navy);
+    border-bottom: 1px solid var(--navy-mid);
+    padding: 6px 0;
+  }
+
+  .status-inner {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ash);
+  }
+
+  .s-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .s-dot.red { background: var(--alert-red-text); box-shadow: 0 0 4px var(--alert-red-text); }
+  .s-dot.amber { background: var(--alert-amber); box-shadow: 0 0 4px var(--alert-amber); }
+
+  .s-label { color: var(--steel); }
+  .s-value { color: var(--cloud); font-weight: 500; }
+
+  /* ══════════════════════════════════════
+     CONTENT
+     ══════════════════════════════════════ */
+  .container {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 20px 20px 50px;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 24px;
+  }
+
+  /* ── LEAD BULLETIN ── */
+  .lead-bulletin {
+    background: var(--warn-bg-strong);
+    border: 1px solid var(--warn-border);
+    border-left: 3px solid var(--warn-text);
+    padding: 18px 22px;
+    margin-bottom: 6px;
+    position: relative;
+  }
+
+  .lead-tag {
+    display: inline-block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    margin-bottom: 10px;
+    background: var(--alert-red);
+    color: #fff;
+  }
+
+  .lead-tag .blink-dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    background: #fff;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  .lead-headline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.2;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+
+  .lead-body {
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--cloud);
+    letter-spacing: 0.3px;
+  }
+
+  .lead-body p { margin-bottom: 8px; }
+
+  .lead-footer {
+    margin-top: 12px;
+    font-size: 10px;
+    color: var(--steel);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  /* ── BULLETIN ITEMS ── */
+  .feed-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--steel);
+    padding: 10px 0 8px;
+    border-bottom: 1px solid var(--navy-mid);
+    margin-bottom: 2px;
+  }
+
+  .bulletin {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-left: 2px solid var(--warn-text);
+    padding: 14px 18px;
+    margin-top: 8px;
+    animation: fade-in 0.5s ease-out both;
+  }
+
+  .bulletin:nth-child(2) { animation-delay: 0.08s; }
+  .bulletin:nth-child(3) { animation-delay: 0.16s; }
+  .bulletin:nth-child(4) { animation-delay: 0.24s; }
+  .bulletin:nth-child(5) { animation-delay: 0.32s; }
+  .bulletin:nth-child(6) { animation-delay: 0.40s; }
+  .bulletin:nth-child(7) { animation-delay: 0.48s; }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .bulletin.critical {
+    border-left-color: var(--alert-red-text);
+    background: var(--alert-red-dim);
+    border-color: rgba(192,57,43,0.2);
+  }
+
+  .b-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--steel);
+  }
+
+  .b-time { color: var(--ash); }
+
+  .b-priority {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    padding: 1px 6px;
+  }
+
+  .b-priority.flash { background: rgba(231,76,60,0.25); color: var(--flash-red); }
+  .b-priority.immediate { background: rgba(232,180,52,0.2); color: var(--warn-text); }
+  .b-priority.routine { background: rgba(39,174,96,0.15); color: var(--alert-green); }
+
+  .b-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .b-body {
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--ash);
+    letter-spacing: 0.2px;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar-card {
+    background: var(--navy);
+    border: 1px solid var(--navy-mid);
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+
+  .card-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--steel);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--navy-mid);
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-cell {
+    background: var(--navy-deep);
+    border: 1px solid var(--navy-mid);
+    padding: 10px 8px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .stat-val.warn { color: var(--warn-text); }
+  .stat-val.danger { color: var(--alert-red-text); }
+
+  .stat-key {
+    font-size: 9px;
+    color: var(--steel);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+
+  .row-list { list-style: none; }
+
+  .row-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(20,34,54,0.8);
+    font-size: 11px;
+  }
+
+  .row-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 500;
+    color: var(--cloud);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 11px;
+  }
+
+  .row-badge {
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    font-weight: 500;
+  }
+
+  .row-badge.red { color: var(--flash-red); background: var(--alert-red-dim); }
+  .row-badge.amber { color: var(--warn-text); background: rgba(212,160,23,0.12); }
+  .row-badge.green { color: var(--alert-green); background: rgba(39,174,96,0.1); }
+
+  .sched-item {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(20,34,54,0.8);
+  }
+
+  .sched-time {
+    font-size: 10px;
+    color: var(--warn-text);
+    letter-spacing: 1px;
+  }
+
+  .sched-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    color: var(--cloud);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── DISCLAIMER ── */
+  .disclaimer {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 14px 20px 36px;
+    font-size: 9px;
+    color: var(--slate);
+    line-height: 1.6;
+    border-top: 1px solid var(--navy-mid);
+    text-align: center;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 800px) {
+    .container { grid-template-columns: 1fr; }
+    .header-inner { flex-direction: column; gap: 6px; align-items: flex-start; }
+    .lead-headline { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PRANK REVEAL -->
+<div id="prank-overlay">
+  <div class="prank-emoji">&#x1F41F;</div>
+  <div class="prank-title">APRIL FOOLS</div>
+  <div class="prank-sub">
+    World War 3 is not happening.<br>You just got got.<br><br>
+    Consider this payback for the pregnancy scare.<br>We're even now. &#x1F49B;
+  </div>
+  <div class="prank-footer">THIS ENTIRE PAGE WAS FAKE &nbsp;&middot;&nbsp; HAPPY APRIL 1ST</div>
+</div>
+
+<!-- MAIN SITE -->
+<div id="main-site">
+
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-classification">PRIORITY</div>
+      <div class="header-title">Strategic Situation Bulletin</div>
+    </div>
+    <div class="header-right">
+      <span>Multi-Theater Alert</span>
+      <span>Indo-Pacific / CENTCOM</span>
+      <span id="clock"></span>
+    </div>
+  </div>
+</header>
+
+<div class="alert-stripe"></div>
+
+<div class="ticker-bar">
+  <div class="ticker-label"><span style="animation:blink 1s step-end infinite;display:inline-block;">&#x25CF;</span>&nbsp; FLASH</div>
+  <div class="ticker-track">
+    <span>FPCON DELTA in effect all CENTCOM/INDOPACOM installations</span>
+    <span>PLA Navy CSG Fujian third Taiwan Strait transit in 72 hrs</span>
+    <span>USAF/PLAAF near-miss intercept south Paracel Islands 0422Z</span>
+    <span>Chinese mil advisory delegation arrives Tehran w/ air defense assets</span>
+    <span>NATO Art. 4 consultations invoked by GBR FRA POL</span>
+    <span>Brent crude $141/bbl on Hormuz closure risk</span>
+    <span>FPCON DELTA in effect all CENTCOM/INDOPACOM installations</span>
+    <span>PLA Navy CSG Fujian third Taiwan Strait transit in 72 hrs</span>
+    <span>USAF/PLAAF near-miss intercept south Paracel Islands 0422Z</span>
+    <span>Chinese mil advisory delegation arrives Tehran w/ air defense assets</span>
+    <span>NATO Art. 4 consultations invoked by GBR FRA POL</span>
+    <span>Brent crude $141/bbl on Hormuz closure risk</span>
+  </div>
+</div>
+
+<div class="status-row">
+  <div class="status-inner">
+    <div class="status-item">
+      <div class="s-dot red"></div>
+      <span class="s-label">DEFCON:</span>
+      <span class="s-value">2</span>
+    </div>
+    <div class="status-item">
+      <div class="s-dot red"></div>
+      <span class="s-label">Taiwan Strait:</span>
+      <span class="s-value">Active Posturing</span>
+    </div>
+    <div class="status-item">
+      <div class="s-dot amber"></div>
+      <span class="s-label">Persian Gulf:</span>
+      <span class="s-value">Elevated</span>
+    </div>
+    <div class="status-item">
+      <div class="s-dot amber"></div>
+      <span class="s-label">S. China Sea:</span>
+      <span class="s-value">Contested</span>
+    </div>
+    <div class="status-item">
+      <span class="s-label">Day:</span>
+      <span class="s-value">001 / Escalation</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="primary-col">
+
+    <!-- LEAD -->
+    <div class="lead-bulletin">
+      <div class="lead-tag"><span class="blink-dot"></span>FLASH BULLETIN</div>
+      <div class="lead-headline">USAF F-35A / PLAAF J-20 NEAR-MISS INTERCEPT OVER SOUTH CHINA SEA &mdash; BOTH PARTIES CLAIM PROVOCATION</div>
+      <div class="lead-body">
+        <p>AT APPROX 0422Z A USAF F-35A (KADENA AB) AND PLAAF J-20 CLOSED TO WITHIN 40M DURING CONTESTED INTERCEPT OPS 90NM SW PARACEL ISLANDS. PENTAGON CHARACTERIZES ENCOUNTER AS UNSAFE/UNPROFESSIONAL. PRC MOD STATES U.S. CONDUCTING PROVOCATIVE RECON IN SOVEREIGN AIRSPACE. BOTH AIRCRAFT RTB. THIRD INCIDENT THIS WEEK. CLOSEST KNOWN F-35/J-20 APPROACH ON RECORD.</p>
+        <p>INDOPACOM HAS ISSUED IMMEDIATE STANDBY ORDER TO ALL FORWARD-DEPLOYED AIR ASSETS IN THEATER. DIPLOMATIC CHANNELS DESCRIBED AS OPEN BUT UNRESPONSIVE.</p>
+      </div>
+      <div class="lead-footer">
+        <span>SRC: PACIFIC BUREAU / MULTI-SOURCE CORROBORATION</span>
+        <span>DTG: 010422Z APR 2026</span>
+        <span>CONFIDENCE: HIGH</span>
+      </div>
+    </div>
+
+    <!-- FEED -->
+    <div class="feed-label">Situation Updates</div>
+
+    <div class="bulletin critical">
+      <div class="b-header">
+        <span class="b-time">0548Z</span>
+        <span class="b-priority flash">Flash</span>
+      </div>
+      <div class="b-title">PLA NAVY CSG FUJIAN ENTERS TAIWAN STRAIT &mdash; ROC ARMED FORCES FULL AIR DEFENSE ALERT</div>
+      <div class="b-body">FUJIAN CSG + 6 ESCORT VESSELS + 2 SSN ENTERED NORTHERN APPROACH TAIWAN STRAIT PRE-DAWN. ROC MND CONFIRMS F-16V SCRAMBLE, HARPOON CDCM BATTERIES ACTIVATED WESTERN COAST. THIRD PLA NAVY STRAIT TRANSIT IN 72 HRS. ASSESSED AS EXCEEDING ROUTINE COERCION POSTURE. RECOMMEND CONTINUED MONITORING ALL PLA NAVY SURFACE ACTION GROUPS WESTERN PACIFIC.</div>
+    </div>
+
+    <div class="bulletin">
+      <div class="b-header">
+        <span class="b-time">0501Z</span>
+        <span class="b-priority immediate">Immediate</span>
+      </div>
+      <div class="b-title">PRC MILITARY ADVISORY DELEGATION ARRIVES TEHRAN &mdash; AIR DEFENSE SYSTEMS POSSIBLY IN TRANSIT</div>
+      <div class="b-body">IRIB BROADCAST FOOTAGE OF PRC MIL DELEGATION AT MEHRABAD APT, MET BY IRGC-ASF COMMANDERS. UNVERIFIED IMAGERY SHOWS HQ-9 SERIES COMPONENTS AT STAGING AREA SOUTH OF ISFAHAN. IF CONFIRMED: FIRST CHINESE IADS DEPLOYMENT TO MIDDLE EAST PARTNER NATION. ASSESSMENT ONGOING. CENTCOM NOTIFIED.</div>
+    </div>
+
+    <div class="bulletin critical">
+      <div class="b-header">
+        <span class="b-time">0433Z</span>
+        <span class="b-priority flash">Flash</span>
+      </div>
+      <div class="b-title">DOD ELEVATES FPCON TO DELTA &mdash; ALL CENTCOM / INDOPACOM LEAVE CANCELLED EFFECTIVE IMMEDIATELY</div>
+      <div class="b-body">FORCE PROTECTION CONDITION RAISED TO DELTA (HIGHEST) ALL INSTALLATIONS UNDER CENTCOM AND INDOPACOM. NON-ESSENTIAL LEAVE CANCELLED. SENIOR DEFENSE OFFICIAL: "MOST COMPLEX MULTI-THEATER ESCALATION DYNAMIC SINCE COLD WAR." ALL PERSONNEL REPORT TO DUTY STATIONS.</div>
+    </div>
+
+    <div class="bulletin">
+      <div class="b-header">
+        <span class="b-time">0347Z</span>
+        <span class="b-priority immediate">Immediate</span>
+      </div>
+      <div class="b-title">NATO ART. 4 CONSULTATIONS INVOKED &mdash; GBR, FRA, POL REQUEST EMERGENCY NAC SESSION</div>
+      <div class="b-body">THREE NATO MEMBERS FORMALLY INVOKE ARTICLE 4 CITING RAPID DESTABILIZING ESCALATION INDO-PACIFIC AND IMPLICATIONS FOR EURO-ATLANTIC SECURITY. EMERGENCY NORTH ATLANTIC COUNCIL SESSION EXPECTED WITHIN HOURS. ALLIANCE ASSESSING PREEMPTIVE FORCE POSTURE ADJUSTMENTS MEDITERRANEAN.</div>
+    </div>
+
+    <div class="bulletin">
+      <div class="b-header">
+        <span class="b-time">0255Z</span>
+        <span class="b-priority routine">Routine</span>
+      </div>
+      <div class="b-title">USS RONALD REAGAN CSG DIVERTED TO WESTERN PACIFIC HOLDING POSITION</div>
+      <div class="b-body">CVN-76 STRIKE GROUP DIVERTED FROM PORT CALL SYDNEY. ORDERED HOLDING POSITION EAST PHILIPPINE SEA. THREE U.S. CSG NOW WITHIN OPERATIONAL RANGE TAIWAN STRAIT. HIGHEST CONCENTRATION SINCE 1996 STRAIT CRISIS.</div>
+    </div>
+
+    <div class="bulletin">
+      <div class="b-header">
+        <span class="b-time">0118Z</span>
+        <span class="b-priority immediate">Immediate</span>
+      </div>
+      <div class="b-title">GLOBAL MARKETS FREEFALL &mdash; BRENT CRUDE PAST $140/BBL ON HORMUZ CLOSURE RISK</div>
+      <div class="b-body">NIKKEI 225 -6.2%. HANG SENG -8.1%. BRENT $141/BBL. FLIGHT TO SAFETY ACCELERATING. MARKET REACTION DRIVEN BY ASSESSED COORDINATED PRC-IRI THREAT TO STRAIT OF HORMUZ AND MALACCA STRAIT SHIPPING LANES.</div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside>
+
+    <div class="sidebar-card">
+      <div class="card-label">Force Posture</div>
+      <div class="stat-grid">
+        <div class="stat-cell">
+          <div class="stat-val danger">DELTA</div>
+          <div class="stat-key">FPCON</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val">3</div>
+          <div class="stat-key">U.S. CSG<br>in Theater</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val warn">47</div>
+          <div class="stat-key">PLA Navy<br>Vessels Tracked</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val warn">$141</div>
+          <div class="stat-key">Brent Crude<br>USD/BBL</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="card-label">Corridor Status</div>
+      <ul class="row-list">
+        <li class="row-item">
+          <span class="row-name">Taiwan Strait</span>
+          <span class="row-badge red">Contested</span>
+        </li>
+        <li class="row-item">
+          <span class="row-name">SCS ADIZ</span>
+          <span class="row-badge red">Active Ops</span>
+        </li>
+        <li class="row-item">
+          <span class="row-name">Strait of Hormuz</span>
+          <span class="row-badge amber">Elevated</span>
+        </li>
+        <li class="row-item">
+          <span class="row-name">Malacca Strait</span>
+          <span class="row-badge amber">Monitoring</span>
+        </li>
+        <li class="row-item">
+          <span class="row-name">GIUK Gap</span>
+          <span class="row-badge green">Normal</span>
+        </li>
+        <li class="row-item">
+          <span class="row-name">E. Med / Suez</span>
+          <span class="row-badge green">Normal</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="card-label">Scheduled Briefs</div>
+      <div class="sched-item">
+        <div class="sched-time">0600Z</div>
+        <div class="sched-title">INDOPACOM CDR &mdash; SITREP</div>
+      </div>
+      <div class="sched-item">
+        <div class="sched-time">0800Z</div>
+        <div class="sched-title">NAC Emergency Session</div>
+      </div>
+      <div class="sched-item">
+        <div class="sched-time">1300Z</div>
+        <div class="sched-title">Pentagon Press Sec &mdash; On Record</div>
+      </div>
+      <div class="sched-item">
+        <div class="sched-time">1500Z</div>
+        <div class="sched-title">UNSC &mdash; Closed Consultations</div>
+      </div>
+      <div class="sched-item">
+        <div class="sched-time">1800Z</div>
+        <div class="sched-title">Combined SITREP &mdash; All Theaters</div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<div class="disclaimer">
+  This is a work of fiction created for entertainment purposes only. All events described are entirely fabricated.<br>
+  Not affiliated with any government, military, intelligence agency, or news organization.
+</div>
+
+</div>
+
+<script>
+  function updateClock() {
+    var now = new Date();
+    var h = String(now.getUTCHours()).padStart(2, '0');
+    var m = String(now.getUTCMinutes()).padStart(2, '0');
+    var s = String(now.getUTCSeconds()).padStart(2, '0');
+    document.getElementById('clock').textContent = h + m + s + 'Z';
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  function checkReveal() {
+    var now = new Date();
+    var ukParts = new Intl.DateTimeFormat('en-GB', {
+      day: 'numeric', month: 'numeric', year: 'numeric',
+      hour: 'numeric', minute: 'numeric',
+      hour12: false, timeZone: 'Europe/London'
+    }).formatToParts(now);
+    var p = {};
+    ukParts.forEach(function(x) { p[x.type] = parseInt(x.value) || 0; });
+    if ((p.month === 4 && p.day >= 2) || p.month > 4 || (p.month < 4 && p.year > 2026)) {
+      document.getElementById('prank-overlay').classList.add('active');
+      document.getElementById('main-site').style.display = 'none';
+    }
+  }
+  checkReveal();
+  setInterval(checkReveal, 10000);
+</script>
+
+</body>
+</html>
